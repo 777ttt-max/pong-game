@@ -130,22 +130,6 @@
       overflow: hidden;
     }
 
-    .score-box::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.2), transparent);
-      animation: sweep 3s infinite;
-    }
-
-    @keyframes sweep {
-      0% { left: -100%; }
-      100% { left: 100%; }
-    }
-
     .score-label {
       font-size: 0.75rem;
       color: var(--primary);
@@ -159,12 +143,6 @@
       font-weight: bold;
       color: var(--light);
       text-shadow: 0 0 10px var(--primary);
-    }
-
-    .score-stats {
-      font-size: 0.7rem;
-      color: var(--accent);
-      margin-top: 8px;
     }
 
     .vs {
@@ -216,9 +194,9 @@
       border-bottom: 2px solid var(--primary);
     }
 
-    .mode-btn {
+    .mode-btn, .difficulty-btn {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       margin-bottom: 8px;
       background: rgba(0, 217, 255, 0.1);
       border: 2px solid var(--primary);
@@ -232,38 +210,28 @@
       letter-spacing: 1px;
     }
 
-    .mode-btn:hover {
+    .mode-btn:hover, .difficulty-btn:hover {
       background: var(--primary);
       color: var(--darker);
       transform: translateX(5px);
       box-shadow: 0 0 20px var(--primary);
     }
 
-    .mode-btn.active {
+    .mode-btn.active, .difficulty-btn.active {
       background: var(--primary);
       color: var(--darker);
       box-shadow: 0 0 20px var(--primary);
     }
 
     .difficulty-btn {
-      padding: 8px 12px;
-      margin-bottom: 6px;
-      background: rgba(131, 56, 236, 0.1);
-      border: 1px solid var(--accent);
+      border-color: var(--accent);
       color: var(--accent);
-      border-radius: 6px;
-      cursor: pointer;
+      background: rgba(131, 56, 236, 0.1);
+      padding: 8px;
       font-size: 0.7rem;
-      transition: all 0.3s ease;
-      width: 100%;
     }
 
     .difficulty-btn:hover {
-      background: var(--accent);
-      color: var(--darker);
-    }
-
-    .difficulty-btn.active {
       background: var(--accent);
       color: var(--darker);
     }
@@ -297,10 +265,6 @@
       border-left: 3px solid var(--accent);
     }
 
-    .control-item {
-      margin-bottom: 6px;
-    }
-
     .key {
       background: rgba(0, 217, 255, 0.2);
       color: var(--primary);
@@ -321,16 +285,6 @@
       font-size: 0.9rem;
       color: var(--accent);
       margin-top: 20px;
-    }
-
-    .status-text {
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-
-    .status-action {
-      font-size: 0.8rem;
-      color: var(--primary);
     }
 
     .bottom-controls {
@@ -361,41 +315,13 @@
       box-shadow: 0 0 20px var(--primary);
     }
 
-    .btn.secondary {
-      border-color: var(--secondary);
-      color: var(--secondary);
-      background: rgba(255, 0, 110, 0.1);
-    }
-
-    .btn.secondary:hover {
-      background: var(--secondary);
-      color: var(--light);
-      box-shadow: 0 0 20px var(--secondary);
-    }
-
     @media (max-width: 1024px) {
       .game-wrapper {
         grid-template-columns: 1fr;
       }
-
       h1 {
         font-size: 2rem;
       }
-
-      .sidebar {
-        grid-template-columns: repeat(2, 1fr);
-        flex-direction: row;
-      }
-    }
-
-    .pulse-animation {
-      animation: pulse-intense 0.3s ease-out;
-    }
-
-    @keyframes pulse-intense {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
     }
   </style>
 </head>
@@ -410,31 +336,26 @@
       <div class="main-game">
         <div class="game-header">
           <div class="game-mode">模式: <span id="modeDisplay">VS AI</span></div>
-          <div class="difficulty" id="difficultyDisplay">
-            <span class="difficulty-star">★</span>
-            <span class="difficulty-star">★</span>
-          </div>
+          <div class="difficulty" id="difficultyDisplay">★☆☆☆</div>
         </div>
 
         <div class="scoreboard">
           <div class="score-box">
             <div class="score-label">玩家</div>
             <div class="score-value" id="playerScore">0</div>
-            <div class="stats-stats" id="playerStats" style="font-size: 0.65rem; color: var(--accent); margin-top: 5px;">速度: 0</div>
           </div>
           <div class="vs">VS</div>
           <div class="score-box">
             <div class="score-label" id="opponentLabel">AI</div>
             <div class="score-value" id="opponentScore">0</div>
-            <div class="stats-stats" id="aiStats" style="font-size: 0.65rem; color: var(--accent); margin-top: 5px;">难度: 中</div>
           </div>
         </div>
 
         <canvas id="gameCanvas" width="1200" height="675"></canvas>
 
         <div class="game-status">
-          <div class="status-text" id="gameStatusText">准备就绪</div>
-          <div class="status-action" id="gameStatusAction">按 SPACE 开始游戏</div>
+          <div id="gameStatusText">准备就绪</div>
+          <div id="gameStatusAction">按 SPACE 开始游戏</div>
         </div>
       </div>
 
@@ -478,14 +399,14 @@
         <div class="panel">
           <div class="panel-title">控制方式</div>
           <div class="controls">
-            <div class="control-item">
-              <span class="key">↑↓</span> 或 <span class="key">鼠标</span> 移动球拍
+            <div>
+              <span class="key">↑↓</span> 或 <span class="key">鼠标</span><br/>移动球拍
             </div>
-            <div class="control-item">
-              <span class="key">SPACE</span> 开始/暂停
+            <div style="margin-top: 8px;">
+              <span class="key">SPACE</span><br/>开始/暂停
             </div>
-            <div class="control-item">
-              <span class="key">R</span> 重新开始
+            <div style="margin-top: 8px;">
+              <span class="key">R</span><br/>重新开始
             </div>
           </div>
         </div>
@@ -494,10 +415,443 @@
 
     <div class="bottom-controls">
       <button class="btn" id="resetBtn">重新开始</button>
-      <button class="btn secondary" id="pauseBtn">暂停</button>
+      <button class="btn" id="pauseBtn">暂停</button>
     </div>
   </div>
 
-  <script src="game.js"></script>
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // UI 元素
+    const playerScoreEl = document.getElementById('playerScore');
+    const opponentScoreEl = document.getElementById('opponentScore');
+    const opponentLabelEl = document.getElementById('opponentLabel');
+    const modeDisplayEl = document.getElementById('modeDisplay');
+    const difficultyDisplayEl = document.getElementById('difficultyDisplay');
+    const statusTextEl = document.getElementById('gameStatusText');
+    const statusActionEl = document.getElementById('gameStatusAction');
+    const statsRoundsEl = document.getElementById('statsRounds');
+    const statsHitsEl = document.getElementById('statsHits');
+    const statsWinRateEl = document.getElementById('statsWinRate');
+    const statsHighScoreEl = document.getElementById('statsHighScore');
+
+    // 游戏对象
+    const leftPaddle = {
+      x: 36,
+      y: canvas.height / 2 - 80,
+      width: 22,
+      height: 160,
+      speed: 8,
+    };
+
+    const rightPaddle = {
+      x: canvas.width - 58,
+      y: canvas.height / 2 - 80,
+      width: 22,
+      height: 160,
+      speed: 6,
+    };
+
+    const ball = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      radius: 12,
+      vx: 0,
+      vy: 0,
+      trail: [],
+    };
+
+    const keyboard = {
+      ArrowUp: false,
+      ArrowDown: false,
+      KeyW: false,
+      KeyS: false,
+    };
+
+    const difficulties = {
+      easy: { label: '简单', ai: 5.3, ball: 6.5, angle: 0.7, target: 5 },
+      medium: { label: '中等', ai: 6.8, ball: 7.4, angle: 0.9, target: 6 },
+      hard: { label: '困难', ai: 8.1, ball: 8.6, angle: 1.1, target: 7 },
+      impossible: { label: '地狱', ai: 10.2, ball: 10.1, angle: 1.35, target: 8 },
+    };
+
+    const modes = {
+      'vs-ai': { label: 'VS AI', opponent: 'AI', target: 7 },
+      'vs-player': { label: 'VS 玩家', opponent: '玩家2', target: 7 },
+      survival: { label: '生存模式', opponent: '机器', target: 5 },
+      'time-attack': { label: '限时模式', opponent: 'AI', target: 0 },
+    };
+
+    // 游戏状态
+    let currentDifficulty = 'easy';
+    let currentMode = 'vs-ai';
+    let playerScore = 0;
+    let opponentScore = 0;
+    let rounds = 0;
+    let totalHits = 0;
+    let winCount = 0;
+    let highScore = 0;
+    let isPlaying = false;
+    let isPaused = false;
+    let isGameOver = false;
+    let timeLeft = 60;
+    let lastTimestamp = 0;
+
+    function clamp(value, min, max) {
+      return Math.min(Math.max(value, min), max);
+    }
+
+    function getDifficultyConfig() {
+      return difficulties[currentDifficulty];
+    }
+
+    function getModeConfig() {
+      return modes[currentMode];
+    }
+
+    function setStatus(text, action) {
+      statusTextEl.textContent = text;
+      statusActionEl.textContent = action;
+    }
+
+    function updateUI() {
+      playerScoreEl.textContent = playerScore;
+      opponentScoreEl.textContent = opponentScore;
+      statsRoundsEl.textContent = rounds;
+      statsHitsEl.textContent = totalHits;
+
+      const totalGames = Math.max(1, rounds);
+      const winRate = ((winCount / totalGames) * 100).toFixed(0);
+      statsWinRateEl.textContent = `${winRate}%`;
+      statsHighScoreEl.textContent = highScore;
+
+      // 更新难度星级
+      const starCount = {
+        easy: 1,
+        medium: 2,
+        hard: 3,
+        impossible: 4,
+      };
+      const stars = Array.from({ length: 4 }, (_, index) => {
+        return index < starCount[currentDifficulty] ? '★' : '☆';
+      }).join('');
+      difficultyDisplayEl.innerHTML = stars;
+
+      // 更新模式
+      const modeCfg = getModeConfig();
+      modeDisplayEl.textContent = modeCfg.label;
+      opponentLabelEl.textContent = modeCfg.opponent;
+    }
+
+    function resetBall(direction = 1) {
+      ball.x = canvas.width / 2;
+      ball.y = canvas.height / 2;
+      ball.trail = [];
+
+      const cfg = getDifficultyConfig();
+      const speed = cfg.ball;
+      const angle = (Math.random() * 1.6 - 0.8) * cfg.angle;
+
+      ball.vx = direction * speed * Math.cos(angle);
+      ball.vy = speed * Math.sin(angle);
+    }
+
+    function resetPaddles() {
+      leftPaddle.y = canvas.height / 2 - leftPaddle.height / 2;
+      rightPaddle.y = canvas.height / 2 - rightPaddle.height / 2;
+    }
+
+    function restartMatch() {
+      playerScore = 0;
+      opponentScore = 0;
+      totalHits = 0;
+      rounds = 0;
+      timeLeft = 60;
+      winCount = 0;
+      isPlaying = false;
+      isPaused = false;
+      isGameOver = false;
+      resetPaddles();
+      resetBall(1);
+      setStatus('准备就绪', '按 SPACE 开始游戏');
+      updateUI();
+    }
+
+    function checkGameOver() {
+      const modeCfg = getModeConfig();
+      const target = modeCfg.target || 7;
+
+      if ((playerScore >= target || opponentScore >= target) && currentMode !== 'time-attack') {
+        isGameOver = true;
+        isPlaying = false;
+        const winner = playerScore > opponentScore ? '玩家胜' : '对手胜';
+        if (playerScore > opponentScore) winCount++;
+        highScore = Math.max(highScore, Math.max(playerScore, opponentScore));
+        setStatus(`${winner}，比赛结束`, '按 R 重新开始');
+        return true;
+      }
+
+      if (currentMode === 'time-attack' && timeLeft <= 0) {
+        isGameOver = true;
+        isPlaying = false;
+        const winner = playerScore > opponentScore ? '玩家胜' : opponentScore > playerScore ? 'AI 胜' : '平局';
+        if (playerScore > opponentScore) winCount++;
+        highScore = Math.max(highScore, Math.max(playerScore, opponentScore));
+        setStatus(`${winner}，时间到`, '按 R 重新开始');
+        return true;
+      }
+
+      return false;
+    }
+
+    function update(dt) {
+      if (!isPlaying || isPaused) return;
+
+      // 时间模式
+      if (currentMode === 'time-attack') {
+        timeLeft -= dt;
+        if (timeLeft <= 0) {
+          checkGameOver();
+          return;
+        }
+      }
+
+      // 左侧球拍
+      if (keyboard.ArrowUp) {
+        leftPaddle.y -= leftPaddle.speed;
+      }
+      if (keyboard.ArrowDown) {
+        leftPaddle.y += leftPaddle.speed;
+      }
+      leftPaddle.y = clamp(leftPaddle.y, 0, canvas.height - leftPaddle.height);
+
+      // 右侧球拍
+      if (currentMode === 'vs-player') {
+        if (keyboard.KeyW) rightPaddle.y -= rightPaddle.speed;
+        if (keyboard.KeyS) rightPaddle.y += rightPaddle.speed;
+      } else {
+        const cfg = getDifficultyConfig();
+        const targetY = ball.y - rightPaddle.height / 2;
+        if (Math.abs(targetY - rightPaddle.y) > 5) {
+          rightPaddle.y += (targetY - rightPaddle.y) * 0.08;
+        }
+      }
+      rightPaddle.y = clamp(rightPaddle.y, 0, canvas.height - rightPaddle.height);
+
+      // 球移动
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+
+      // 球的轨迹
+      ball.trail.push({ x: ball.x, y: ball.y });
+      if (ball.trail.length > 15) ball.trail.shift();
+
+      // 上下墙碰撞
+      if (ball.y - ball.radius <= 0) {
+        ball.y = ball.radius;
+        ball.vy *= -1;
+      }
+      if (ball.y + ball.radius >= canvas.height) {
+        ball.y = canvas.height - ball.radius;
+        ball.vy *= -1;
+      }
+
+      // 左侧球拍碰撞
+      if (
+        ball.x - ball.radius <= leftPaddle.x + leftPaddle.width &&
+        ball.y >= leftPaddle.y &&
+        ball.y <= leftPaddle.y + leftPaddle.height &&
+        ball.vx < 0
+      ) {
+        ball.x = leftPaddle.x + leftPaddle.width + ball.radius;
+        const relativeImpact = (ball.y - (leftPaddle.y + leftPaddle.height / 2)) / (leftPaddle.height / 2);
+        ball.vx = Math.abs(ball.vx) + 0.5;
+        ball.vy = relativeImpact * 8;
+        totalHits++;
+      }
+
+      // 右侧球拍碰撞
+      if (
+        ball.x + ball.radius >= rightPaddle.x &&
+        ball.y >= rightPaddle.y &&
+        ball.y <= rightPaddle.y + rightPaddle.height &&
+        ball.vx > 0
+      ) {
+        ball.x = rightPaddle.x - ball.radius;
+        const relativeImpact = (ball.y - (rightPaddle.y + rightPaddle.height / 2)) / (rightPaddle.height / 2);
+        ball.vx = -Math.abs(ball.vx) - 0.5;
+        ball.vy = relativeImpact * 8;
+        totalHits++;
+      }
+
+      // 计分
+      if (ball.x < -ball.radius) {
+        opponentScore++;
+        if (!checkGameOver()) {
+          resetBall(1);
+        }
+      }
+      if (ball.x > canvas.width + ball.radius) {
+        playerScore++;
+        if (!checkGameOver()) {
+          resetBall(-1);
+        }
+      }
+
+      highScore = Math.max(highScore, Math.max(playerScore, opponentScore));
+      updateUI();
+    }
+
+    function draw() {
+      // 背景
+      ctx.fillStyle = '#09152d';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 渐变背景
+      const gradient = ctx.createRadialGradient(
+        canvas.width / 2, canvas.height / 2, 20,
+        canvas.width / 2, canvas.height / 2, canvas.width * 0.7
+      );
+      gradient.addColorStop(0, '#122043');
+      gradient.addColorStop(1, '#070d1d');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 中线
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([15, 18]);
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 2, 0);
+      ctx.lineTo(canvas.width / 2, canvas.height);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 球拍 - 左侧
+      ctx.fillStyle = '#00d9ff';
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#00d9ff';
+      ctx.fillRect(leftPaddle.x, leftPaddle.y, leftPaddle.width, leftPaddle.height);
+      ctx.shadowBlur = 0;
+
+      // 球拍 - 右侧
+      ctx.fillStyle = '#ff5d8f';
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#ff5d8f';
+      ctx.fillRect(rightPaddle.x, rightPaddle.y, rightPaddle.width, rightPaddle.height);
+      ctx.shadowBlur = 0;
+
+      // 球的轨迹
+      for (let i = 0; i < ball.trail.length; i++) {
+        const p = ball.trail[i];
+        ctx.fillStyle = `rgba(255,255,255,${i / ball.trail.length * 0.3})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, ball.radius * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 球
+      ctx.fillStyle = '#7ae7ff';
+      ctx.shadowBlur = 25;
+      ctx.shadowColor = '#00d9ff';
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // 计时器（限时模式）
+      if (currentMode === 'time-attack') {
+        ctx.fillStyle = 'rgba(17, 24, 39, 0.8)';
+        ctx.fillRect(canvas.width / 2 - 90, 20, 180, 40);
+        ctx.strokeStyle = '#00d9ff';
+        ctx.strokeRect(canvas.width / 2 - 90, 20, 180, 40);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`TIME ${Math.max(0, Math.ceil(timeLeft))}s`, canvas.width / 2, 47);
+      }
+    }
+
+    function animate(ts) {
+      const dt = (ts - lastTimestamp) / 1000 || 0.016;
+      lastTimestamp = ts;
+
+      update(dt);
+      draw();
+      requestAnimationFrame(animate);
+    }
+
+    function togglePause() {
+      if (isGameOver) return;
+
+      if (!isPlaying) {
+        isPlaying = true;
+        isPaused = false;
+        setStatus('游戏进行中', '按 SPACE 暂停');
+        if (ball.vx === 0 && ball.vy === 0) {
+          resetBall(Math.random() < 0.5 ? -1 : 1);
+        }
+        return;
+      }
+
+      isPaused = !isPaused;
+      setStatus(
+        isPaused ? '已暂停' : '游戏进行中',
+        isPaused ? '按 SPACE 继续' : '按 SPACE 暂停'
+      );
+    }
+
+    // 事件监听
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePause();
+      } else if (e.key === 'r' || e.key === 'R') {
+        restartMatch();
+      } else if (e.code === 'ArrowUp' || e.code === 'ArrowDown' || e.code === 'KeyW' || e.code === 'KeyS') {
+        keyboard[e.code] = true;
+      }
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (keyboard.hasOwnProperty(e.code)) {
+        keyboard[e.code] = false;
+      }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseY = e.clientY - rect.top;
+      leftPaddle.y = mouseY - leftPaddle.height / 2;
+      leftPaddle.y = clamp(leftPaddle.y, 0, canvas.height - leftPaddle.height);
+    });
+
+    // 模式和难度按钮
+    document.querySelectorAll('.mode-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        currentMode = btn.dataset.mode;
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        restartMatch();
+      });
+    });
+
+    document.querySelectorAll('.difficulty-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        currentDifficulty = btn.dataset.difficulty;
+        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateUI();
+      });
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', restartMatch);
+    document.getElementById('pauseBtn').addEventListener('click', togglePause);
+
+    // 初始化
+    restartMatch();
+    requestAnimationFrame(animate);
+  </script>
 </body>
 </html>
