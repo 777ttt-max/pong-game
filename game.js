@@ -128,7 +128,7 @@ function updateModeUI() {
   opponentLabelEl.textContent = modeCfg.opponent;
 
   if (currentMode === 'time-attack') {
-    setStatus('倒计时模式', '按 SPACE 开始/暂停');
+    setStatus('倒计时模式', '按 SPACE 开始');
   } else if (!isPlaying && !isGameOver) {
     setStatus('准备就绪', '按 SPACE 开始游戏');
   }
@@ -167,16 +167,6 @@ function resetBall(direction = lastServeDirection) {
 function resetPaddles() {
   leftPaddle.y = canvas.height / 2 - leftPaddle.height / 2;
   rightPaddle.y = canvas.height / 2 - rightPaddle.height / 2;
-}
-
-function resetRoundState() {
-  rounds += 1;
-  resetPaddles();
-  resetBall(Math.random() < 0.5 ? -1 : 1);
-  isPlaying = true;
-  isPaused = false;
-  isGameOver = false;
-  updateStats();
 }
 
 function restartMatch() {
@@ -229,36 +219,6 @@ function endRound(winnerText) {
   }
 
   return false;
-}
-
-function handleScoring() {
-  const modeCfg = getModeConfig();
-  const target = modeCfg.target || 7;
-
-  if (ball.x < 0) {
-    opponentScore += 1;
-    if (currentMode === 'time-attack') {
-      setStatus('AI 进球！', '继续冲刺');
-    }
-    if (endRound()) return;
-    if (currentMode === 'survival' || currentMode === 'vs-ai' || currentMode === 'vs-player') {
-      if (opponentScore >= target || playerScore >= target) return;
-    }
-    resetBall(1);
-  } else if (ball.x > canvas.width) {
-    playerScore += 1;
-    if (currentMode === 'time-attack') {
-      setStatus('玩家进球！', '继续冲刺');
-    }
-    if (endRound()) return;
-    if (currentMode === 'survival' || currentMode === 'vs-ai' || currentMode === 'vs-player') {
-      if (opponentScore >= target || playerScore >= target) return;
-    }
-    resetBall(-1);
-  }
-
-  highScore = Math.max(highScore, Math.max(playerScore, opponentScore));
-  updateStats();
 }
 
 function moveLeftPaddle(dt) {
@@ -350,16 +310,16 @@ function moveBall(dt) {
 
   if (ball.x < -ball.radius) {
     opponentScore += 1;
-    resetBall(1);
     updateStats();
     if (endRound()) return;
+    resetBall(1);
   }
 
   if (ball.x > canvas.width + ball.radius) {
     playerScore += 1;
-    resetBall(-1);
     updateStats();
     if (endRound()) return;
+    resetBall(-1);
   }
 }
 
@@ -577,12 +537,4 @@ updateDifficultyUI();
 updateModeUI();
 updateStats();
 resetBall(1);
-astartGame();
-function startGame() {
-  isPlaying = true;
-  isPaused = false;
-  setStatus('游戏进行中', '按 SPACE 暂停');
-  requestAnimationFrame(animate);
-}
-
-restartMatch();
+requestAnimationFrame(animate);
