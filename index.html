@@ -107,10 +107,6 @@
       gap: 8px;
     }
 
-    .difficulty-star {
-      color: #ffaa00;
-    }
-
     .scoreboard {
       display: flex;
       justify-content: space-between;
@@ -287,6 +283,18 @@
       margin-top: 20px;
     }
 
+    .status-text {
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+
+    .status-action {
+      font-size: 0.85rem;
+      color: var(--secondary);
+    }
+
     .bottom-controls {
       display: flex;
       gap: 15px;
@@ -354,8 +362,8 @@
         <canvas id="gameCanvas" width="1200" height="675"></canvas>
 
         <div class="game-status">
-          <div id="gameStatusText">准备就绪</div>
-          <div id="gameStatusAction">按 SPACE 开始游戏</div>
+          <div class="status-text" id="gameStatusText">准备就绪</div>
+          <div class="status-action" id="gameStatusAction">按 SPACE 开始游戏</div>
         </div>
       </div>
 
@@ -497,6 +505,7 @@
     let isGameOver = false;
     let timeLeft = 60;
     let lastTimestamp = 0;
+    let animationId = null;
 
     function clamp(value, min, max) {
       return Math.min(Math.max(value, min), max);
@@ -631,7 +640,6 @@
         if (keyboard.KeyW) rightPaddle.y -= rightPaddle.speed;
         if (keyboard.KeyS) rightPaddle.y += rightPaddle.speed;
       } else {
-        const cfg = getDifficultyConfig();
         const targetY = ball.y - rightPaddle.height / 2;
         if (Math.abs(targetY - rightPaddle.y) > 5) {
           rightPaddle.y += (targetY - rightPaddle.y) * 0.08;
@@ -779,7 +787,7 @@
 
       update(dt);
       draw();
-      requestAnimationFrame(animate);
+      animationId = requestAnimationFrame(animate);
     }
 
     function togglePause() {
@@ -849,9 +857,11 @@
     document.getElementById('resetBtn').addEventListener('click', restartMatch);
     document.getElementById('pauseBtn').addEventListener('click', togglePause);
 
-    // 初始化
+    // 初始化并启动动画循环
+    console.log('Game initialized');
     restartMatch();
-    requestAnimationFrame(animate);
+    updateUI();
+    animationId = requestAnimationFrame(animate);
   </script>
 </body>
 </html>
