@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>高级乒乓球游戏 - Pong Deluxe</title>
+  <style>
+    :root {
+      --primary: #00d9ff;
+      --secondary: #ff006e;
+      --accent: #8338ec;
+      --dark: #0a0e27;
+      --darker: #050812;
+      --light: #f0f3ff;
+      --success: #00ff88;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, var(--darker) 0%, #1a1f3a 50%, var(--dark) 100%);
+      color: var(--light);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1400px;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      animation: glow 2s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+      0%, 100% { text-shadow: 0 0 10px var(--primary); }
+      50% { text-shadow: 0 0 30px var(--primary), 0 0 50px var(--secondary); }
+    }
+
+    h1 {
+      font-size: 3rem;
+      background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--primary);
+      letter-spacing: 2px;
+    }
+
+    .game-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .main-game {
+      background: rgba(10, 14, 39, 0.8);
+      border: 3px solid var(--primary);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 0 40px rgba(0, 217, 255, 0.3), inset 0 0 30px rgba(0, 217, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .game-mode {
+      font-size: 0.9rem;
+      color: var(--primary);
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .difficulty {
+      font-size: 0.85rem;
+      color: var(--accent);
+      display: flex;
+      gap: 8px;
+    }
+
+    .difficulty-star {
+      color: #ffaa00;
+    }
+
+    .scoreboard {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 20px;
+    }
+
+    .score-box {
+      flex: 1;
+      text-align: center;
+      background: rgba(0, 217, 255, 0.1);
+      border: 2px solid var(--primary);
+      border-radius: 15px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .score-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.2), transparent);
+      animation: sweep 3s infinite;
+    }
+
+    @keyframes sweep {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .score-label {
+      font-size: 0.75rem;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .score-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: var(--light);
+      text-shadow: 0 0 10px var(--primary);
+    }
+
+    .score-stats {
+      font-size: 0.7rem;
+      color: var(--accent);
+      margin-top: 8px;
+    }
+
+    .vs {
+      font-size: 1.2rem;
+      color: var(--secondary);
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+      background: radial-gradient(circle at center, #1a1f3a 0%, #0a0e27 100%);
+      border: 2px solid var(--accent);
+      border-radius: 10px;
+      box-shadow: 0 0 30px rgba(131, 56, 236, 0.3);
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .panel {
+      background: rgba(10, 14, 39, 0.8);
+      border: 2px solid var(--primary);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+    }
+
+    .panel-title {
+      font-size: 0.9rem;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .mode-btn {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 8px;
+      background: rgba(0, 217, 255, 0.1);
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+    }
+
+    .mode-btn:hover {
+      background: var(--primary);
+      color: var(--darker);
+      transform: translateX(5px);
+      box-shadow: 0 0 20px var(--primary);
+    }
+
+    .mode-btn.active {
+      background: var(--primary);
+      color: var(--darker);
+      box-shadow: 0 0 20px var(--primary);
+    }
+
+    .difficulty-btn {
+      padding: 8px 12px;
+      margin-bottom: 6px;
+      background: rgba(131, 56, 236, 0.1);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.7rem;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .difficulty-btn:hover {
+      background: var(--accent);
+      color: var(--darker);
+    }
+
+    .difficulty-btn.active {
+      background: var(--accent);
+      color: var(--darker);
+    }
+
+    .stats-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 0.8rem;
+      padding: 8px;
+      background: rgba(0, 217, 255, 0.05);
+      border-radius: 5px;
+    }
+
+    .stats-label {
+      color: var(--accent);
+    }
+
+    .stats-value {
+      color: var(--success);
+      font-weight: bold;
+    }
+
+    .controls {
+      font-size: 0.75rem;
+      color: var(--accent);
+      line-height: 1.6;
+      padding: 10px;
+      background: rgba(131, 56, 236, 0.05);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+    }
+
+    .control-item {
+      margin-bottom: 6px;
+    }
+
+    .key {
+      background: rgba(0, 217, 255, 0.2);
+      color: var(--primary);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: bold;
+      display: inline-block;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .game-status {
+      text-align: center;
+      padding: 15px;
+      background: rgba(131, 56, 236, 0.1);
+      border: 2px solid var(--accent);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: var(--accent);
+      margin-top: 20px;
+    }
+
+    .status-text {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .status-action {
+      font-size: 0.8rem;
+      color: var(--primary);
+    }
+
+    .bottom-controls {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .btn {
+      padding: 12px 30px;
+      border: 2px solid var(--primary);
+      background: rgba(0, 217, 255, 0.1);
+      color: var(--primary);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .btn:hover {
+      background: var(--primary);
+      color: var(--darker);
+      transform: scale(1.05);
+      box-shadow: 0 0 20px var(--primary);
+    }
+
+    .btn.secondary {
+      border-color: var(--secondary);
+      color: var(--secondary);
+      background: rgba(255, 0, 110, 0.1);
+    }
+
+    .btn.secondary:hover {
+      background: var(--secondary);
+      color: var(--light);
+      box-shadow: 0 0 20px var(--secondary);
+    }
+
+    @media (max-width: 1024px) {
+      .game-wrapper {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .sidebar {
+        grid-template-columns: repeat(2, 1fr);
+        flex-direction: row;
+      }
+    }
+
+    .pulse-animation {
+      animation: pulse-intense 0.3s ease-out;
+    }
+
+    @keyframes pulse-intense {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎮 PONG DELUXE 🎮</h1>
+      <p class="subtitle">— 高级乒乓球竞技游戏 —</p>
+    </div>
+
+    <div class="game-wrapper">
+      <div class="main-game">
+        <div class="game-header">
+          <div class="game-mode">模式: <span id="modeDisplay">VS AI</span></div>
+          <div class="difficulty" id="difficultyDisplay">
+            <span class="difficulty-star">★</span>
+            <span class="difficulty-star">★</span>
+          </div>
+        </div>
+
+        <div class="scoreboard">
+          <div class="score-box">
+            <div class="score-label">玩家</div>
+            <div class="score-value" id="playerScore">0</div>
+            <div class="stats-stats" id="playerStats" style="font-size: 0.65rem; color: var(--accent); margin-top: 5px;">速度: 0</div>
+          </div>
+          <div class="vs">VS</div>
+          <div class="score-box">
+            <div class="score-label" id="opponentLabel">AI</div>
+            <div class="score-value" id="opponentScore">0</div>
+            <div class="stats-stats" id="aiStats" style="font-size: 0.65rem; color: var(--accent); margin-top: 5px;">难度: 中</div>
+          </div>
+        </div>
+
+        <canvas id="gameCanvas" width="1200" height="675"></canvas>
+
+        <div class="game-status">
+          <div class="status-text" id="gameStatusText">准备就绪</div>
+          <div class="status-action" id="gameStatusAction">按 SPACE 开始游戏</div>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="panel">
+          <div class="panel-title">游戏模式</div>
+          <button class="mode-btn active" data-mode="vs-ai">VS AI</button>
+          <button class="mode-btn" data-mode="vs-player">VS 玩家</button>
+          <button class="mode-btn" data-mode="survival">生存模式</button>
+          <button class="mode-btn" data-mode="time-attack">限时模式</button>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">难度设置</div>
+          <button class="difficulty-btn active" data-difficulty="easy">简单</button>
+          <button class="difficulty-btn" data-difficulty="medium">中等</button>
+          <button class="difficulty-btn" data-difficulty="hard">困难</button>
+          <button class="difficulty-btn" data-difficulty="impossible">地狱</button>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">统计信息</div>
+          <div class="stats-item">
+            <span class="stats-label">局数</span>
+            <span class="stats-value" id="statsRounds">0</span>
+          </div>
+          <div class="stats-item">
+            <span class="stats-label">击球数</span>
+            <span class="stats-value" id="statsHits">0</span>
+          </div>
+          <div class="stats-item">
+            <span class="stats-label">胜率</span>
+            <span class="stats-value" id="statsWinRate">0%</span>
+          </div>
+          <div class="stats-item">
+            <span class="stats-label">最高分</span>
+            <span class="stats-value" id="statsHighScore">0</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">控制方式</div>
+          <div class="controls">
+            <div class="control-item">
+              <span class="key">↑↓</span> 或 <span class="key">鼠标</span> 移动球拍
+            </div>
+            <div class="control-item">
+              <span class="key">SPACE</span> 开始/暂停
+            </div>
+            <div class="control-item">
+              <span class="key">R</span> 重新开始
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-controls">
+      <button class="btn" id="resetBtn">重新开始</button>
+      <button class="btn secondary" id="pauseBtn">暂停</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
